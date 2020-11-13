@@ -6,6 +6,19 @@ from rest_framework.response import Response
 from .models import Post, Vote
 from .serializers import *
 
+class PostRetrieveDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, requests, *args, **kwargs):
+        post = Post.objects.filter(pk=self.kwargs['pk'], poster=self.request.user)
+        if post.exists():
+            return self.destroy(requests, *args, **kwargs)
+        else:
+            raise ValidationError('Это не твой пост чтоб удалять')
+
+
 
 class PostList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
